@@ -41,6 +41,10 @@ class StreamConf:
         button_stream = self.xml.get_widget("button4")
         button_stream.connect("clicked", self.startstream) 
 
+        button_ff = self.xml.get_widget("button5")
+        button_ff.connect("clicked", self.startff) 
+        button_ff.set_sensitive(False)
+
         # Bind Window Elements
         self.wTitle =  self.xml.get_widget("entry1")
         self.wServer =  self.xml.get_widget("entry2")
@@ -91,7 +95,10 @@ class StreamConf:
         f.write("size = %s\n" % size)
         f.write("fps = %s\n" % fps)
         f.close()
-        
+
+        button = self.xml.get_widget("button4")
+        button.set_sensitive(True)
+                
         print "Configuration Saved"
         
     def openconf(self, sender):
@@ -120,6 +127,10 @@ class StreamConf:
         self.wMountpoint.set_text(conf["mountpoint"])
         self.wSize.set_active(_sizes.index(conf["size"].replace(" ", "")))
         self.wFPS.set_active(_fps.index(conf["fps"]))
+
+
+        button = self.xml.get_widget("button4")
+        button.set_sensitive(True)
         
     def readconf(self, fn):
         # Read a config file to a Dict
@@ -156,9 +167,19 @@ class StreamConf:
         size = self.wSize.get_active_text()      #
         (w, h) = size.split("x")
         
-        cmd = "gst-launch-0.10 v4l2src ! queue ! videorate ! video/x-raw-yuv, framerate=%s/1 ! videoscale ! video/x-raw-yuv,width=%s,height=%s ! ffmpegcolorspace ! theoraenc quality=8 ! queue ! oggmux name=mux  alsasrc ! audio/x-raw-int,rate=22050,channels=1,depth=16 ! queue ! audioconvert ! vorbisenc ! queue ! mux. mux. ! fdsink | oggfwd %s %s %s /%s" % (fps, w.strip(), h.strip(), server, port, passwd, mountpoint)
-        executecmd(cmd)        
+        sender.set_sensitive(False)
         
+        cmd = "gst-launch-0.10 v4l2src ! queue ! videorate ! video/x-raw-yuv, framerate=%s/1 ! videoscale ! video/x-raw-yuv,width=%s,height=%s ! ffmpegcolorspace ! theoraenc quality=8 ! queue ! oggmux name=mux  alsasrc ! audio/x-raw-int,rate=22050,channels=1,depth=16 ! queue ! audioconvert ! vorbisenc ! queue ! mux. mux. ! fdsink | oggfwd %s %s %s /%s &" % (fps, w.strip(), h.strip(), server, port, passwd, mountpoint)
+        executecmd(cmd)        
+        button_ff = self.xml.get_widget("button5")
+        button_ff.set_sensitive(True)
+
+    def startff(self, sender):
+        server = self.wServer.get_text()         #
+        port = self.wPort.get_text()             #
+        mountpoint = self.wMountpoint.get_text() #
+        executecmd("firefox http://%s:%s/%s" % (server, port, mountpoint))
+
 if __name__ == "__main__":
     win = StreamConf()
     win.main()
