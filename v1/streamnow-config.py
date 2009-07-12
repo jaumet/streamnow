@@ -11,18 +11,23 @@ import os.path
 _sizes = ["160x120", "240x180", "256x192", "320x240", "384x288", "480x360"]
 _fps = ["1", "3", "5", "8", "10", "12", "15", "25"]
 
+default_fn = "%s/.streamnow" % os.path.expanduser("~")
+
 class StreamConf:
+    streamStarted = False
+    
     def hello(self, widget, data=None):
         print "Hello World"
 
     def delete_event(self, widget, event, data=None):
-        print "delete event occurred"
         return False
 
     def destroy(self, widget, data=None):
-        print "destroy signal occurred"
+        if self.streamStarted:
+            executecmd("killall oggfwd")
+        self.saveToFile(default_fn)
         gtk.main_quit()
-
+        
     def __init__(self):
         # create a new window
         self.xml = gtk.glade.XML("gui.glade")
@@ -57,6 +62,13 @@ class StreamConf:
         # Default Values
         self.wSize.set_active(1)
         self.wFPS.set_active(5)
+
+        # Load Last Config
+        if os.path.isfile(default_fn):
+            try:                
+                self.loadConfToUi(self.readconf(default_fn))
+            except:
+                print "could not load default conf"
         
     def main(self):
         # All PyGTK applications must have a gtk.main(). Control ends here
@@ -64,16 +76,6 @@ class StreamConf:
         gtk.main()
 
     def apply(self, sender):
-        title = self.wTitle.get_text()
-        server = self.wServer.get_text()
-        port = self.wPort.get_text()
-        passwd = self.wPasswd.get_text()
-        mountpoint = self.wMountpoint.get_text()
-        size = self.wSize.get_active_text()
-        fps = self.wFPS.get_active_text()
-
-        # filechooser = self.xml.get_widget("fileselection1")
-        # filechooser.show()
         chooser = gtk.FileChooserDialog("Save Configuration as",action=gtk.FILE_CHOOSER_ACTION_SAVE,
                                buttons=(gtk.STOCK_CANCEL,gtk.RESPONSE_CANCEL,gtk.STOCK_SAVE,gtk.RESPONSE_OK))
         res = chooser.run()
@@ -85,6 +87,16 @@ class StreamConf:
             return
             
         print "Saving To File:", fn
+        saveToFile(fn)
+        
+    def saveToFile(self, fn):
+        title = self.wTitle.get_text()
+        server = self.wServer.get_text()
+        port = self.wPort.get_text()
+        passwd = self.wPasswd.get_text()
+        mountpoint = self.wMountpoint.get_text()
+        size = self.wSize.get_active_text()
+        fps = self.wFPS.get_active_text()
         
         f = open(fn, "w")
         f.write("title = %s\n" % title)
@@ -98,8 +110,6 @@ class StreamConf:
 
         button = self.xml.get_widget("button4")
         button.set_sensitive(True)
-                
-        print "Configuration Saved"
         
     def openconf(self, sender):
         chooser = gtk.FileChooserDialog("Open Configuration File",action=gtk.FILE_CHOOSER_ACTION_OPEN,
@@ -117,8 +127,10 @@ class StreamConf:
             print "File not found"
             return 
         
+        self.loadConfToUi(self.readconf(fn))
+        
+    def loadConfToUi(self, conf):
         # Get Configuration Dict from the File
-        conf = self.readconf(fn)
         
         self.wTitle.set_text(conf["title"])
         self.wServer.set_text(conf["server"]) 
@@ -173,6 +185,8 @@ class StreamConf:
         executecmd(cmd)        
         button_ff = self.xml.get_widget("button5")
         button_ff.set_sensitive(True)
+        
+        self.streamStarted = True
 
     def startff(self, sender):
         server = self.wServer.get_text()         #
@@ -183,4 +197,3 @@ class StreamConf:
 if __name__ == "__main__":
     win = StreamConf()
     win.main()
-    
