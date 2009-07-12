@@ -1,0 +1,10 @@
+# Comments start with a hash
+
+title  = Test Title
+server = 192.168.1.2
+port   = 51000
+passwd = testpasswd
+mountpoint = mp.ogg
+size   = 320x240
+fps    = 10
+
