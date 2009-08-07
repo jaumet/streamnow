@@ -38,6 +38,6 @@ CREDITS
 Jaume Nualart [jaume AT nualart.cat]
 Chris Hager [chris AT linuxuser.at]
 Anna Sala [asalavila AT gmail.com]
-Jay Vaughan [jayv AT synth.net]
+Jay Vaughan [jay AT synth.net]
 
 
