@@ -1,0 +1,8 @@
+[Desktop Entry]
+GenericName=streamnow
+Name=streamnow
+Exec=streamnow
+Type=Application
+Icon=streamnow
+Terminal=false
+Categories=Gnome;Network;
