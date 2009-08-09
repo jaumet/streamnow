@@ -1,2 +1,2 @@
-!#/bin/bash
-cd /usr/local && python streamnow-config.py
+#!/bin/bash
+cd /usr/local/streamnow && python streamnow-config.py
